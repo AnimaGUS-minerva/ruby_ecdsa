@@ -18,8 +18,8 @@ module ECDSA
     module PrivateKey
       def self.decode(x509privkey)
         bx = x509privkey.private_key
-        grp= x509privkey.group
-        ECDSA::Format::PointOctetString.decode_priv_from_ssl(bx, grp)
+        grp = ECDSA::Group.group_from_openssl(x509privkey.group)
+        return [ECDSA::Format::IntegerOctetString.decode_priv_from_ssl(bx, x509privkey.group), grp]
       end
     end
   end

@@ -25,6 +25,18 @@ module ECDSA
         end.pack('C*')
       end
 
+      def self.decode_priv_from_ssl(ecpoint, group)
+        grp = ECDSA::Group.group_from_openssl(group)
+        size = ecpoint.num_bytes
+        bytes = Array.new(size)
+        (1..size).each {
+          size -= 1
+          bytes[size] = (ecpoint % 256).to_i;
+          ecpoint = ecpoint >> 8;
+        }
+        ECDSA::Format::FieldElementOctetString.decode bytes, grp.field
+      end
+
       # @param string (String)
       # @return (Integer)
       def self.decode(string)
