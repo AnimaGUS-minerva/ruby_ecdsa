@@ -28,7 +28,11 @@ module ECDSA
       # @param string (String)
       # @return (Integer)
       def self.decode(string)
-        string.bytes.reduce { |n, b| (n << 8) + b }
+        case string
+        when String
+          string = string.bytes
+        end
+        string.reduce { |n, b| (n << 8) + b }
       end
     end
   end

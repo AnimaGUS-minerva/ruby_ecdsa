@@ -58,6 +58,18 @@ module ECDSA
         return decode_array(string, group)
       end
 
+      def self.decode_priv_from_ssl(ecpoint, group)
+        grp = ECDSA::Group.group_from_openssl(group)
+        size = ecpoint.num_bytes
+        bytes = Array.new(size)
+        (1..size).each {
+          size -= 1
+          bytes[size] = (ecpoint % 256).to_i;
+          ecpoint = ecpoint >> 8;
+        }
+        ECDSA::Format::FieldElementOctetString.decode bytes, grp.field
+      end
+
       def self.decode_array(array, group)
         raise DecodeError, 'Point octet string is empty.' if array.empty?
 
@@ -75,6 +87,7 @@ module ECDSA
           raise DecodeError, 'Unrecognized start byte for point octet array: 0x%x' % array[0].ord
         end
       end
+
 
       def self.decode_from_integer(bignum_x, group, y_lsb)
         possible_ys = group.solve_for_y(x)
