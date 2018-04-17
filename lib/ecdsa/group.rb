@@ -149,6 +149,18 @@ module ECDSA
       inspect
     end
 
+    def self.group_from_openssl(grp)
+      name = grp.curve_name
+      # add to this as needed.
+      case name
+      when 'prime256v1'
+        ECDSA::Group::Secp256r1
+      when 'secp384v1'
+        ECDSA::Group::Secp384r1
+      end
+    end
+
+
     private
 
     def point_satisfies_equation?(point)
