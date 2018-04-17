@@ -31,6 +31,18 @@ module ECDSA
         end
       end
 
+      def self.decode_from_ssl(ecpoint, group)
+        grp = ECDSA::Group.group_from_openssl(group)
+        size = ecpoint.num_bytes
+        bytes = Array.new(size)
+        (1..size).each {
+          size -= 1
+          bytes[size] = (ecpoint % 256).to_i;
+          ecpoint = ecpoint >> 8;
+        }
+        return decode_array(bytes, grp)
+      end
+
       # Converts an octet string to a {Point} in the specified group.
       # Raises a {DecodeError} if the string is invalid for any reason.
       #
@@ -43,22 +55,33 @@ module ECDSA
       # @return (Point)
       def self.decode(string, group)
         string = string.dup.force_encoding('BINARY')
+        return decode_array(string, group)
+      end
 
-        raise DecodeError, 'Point octet string is empty.' if string.empty?
+      def self.decode_array(array, group)
+        raise DecodeError, 'Point octet string is empty.' if array.empty?
 
-        case string[0].ord
+        case array[0].ord
         when 0
-          check_length string, 1
+          check_length array, 1
           return group.infinity
         when 2
-          decode_compressed string, group, 0
+          decode_compressed array, group, 0
         when 3
-          decode_compressed string, group, 1
+          decode_compressed array, group, 1
         when 4
-          decode_uncompressed string, group
+          decode_uncompressed array, group
         else
-          raise DecodeError, 'Unrecognized start byte for point octet string: 0x%x' % string[0].ord
+          raise DecodeError, 'Unrecognized start byte for point octet array: 0x%x' % array[0].ord
         end
+      end
+
+      def self.decode_from_integer(bignum_x, group, y_lsb)
+        possible_ys = group.solve_for_y(x)
+        y = possible_ys.find { |py| (py % 2) == y_lsb }
+        raise DecodeError, 'Could not solve for y.' if y.nil?
+
+        finish_decode x, y, group
       end
 
       private
@@ -70,11 +93,7 @@ module ECDSA
         x_string = string[1, group.byte_length]
         x = ECDSA::Format::FieldElementOctetString.decode x_string, group.field
 
-        possible_ys = group.solve_for_y(x)
-        y = possible_ys.find { |py| (py % 2) == y_lsb }
-        raise DecodeError, 'Could not solve for y.' if y.nil?
-
-        finish_decode x, y, group
+        decode_from_integer(x, group, y_lsb)
       end
 
       def self.decode_uncompressed(string, group)
