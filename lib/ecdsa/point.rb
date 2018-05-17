@@ -49,6 +49,23 @@ module ECDSA
       [x, y]
     end
 
+    # Returns a binary representation for the given key
+    #
+    # @return (binary)
+    def to_wireformat
+      ECDSA::Format::PointOctetString.encode(self)
+    end
+
+    # Return self, as this is as raw public key.
+    #
+    # other public keys are often kept in a container/wrapper, and to get
+    # the raw public key out, one calls public_key.
+    #
+    # @return(self)
+    def public_key
+      self
+    end
+
     # Adds this point to another point on the same curve using the standard
     # rules for point addition defined in section 2.2.1 of
     # [SEC1](http://www.secg.org/collateral/sec1_final.pdf).
