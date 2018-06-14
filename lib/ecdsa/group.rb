@@ -5,6 +5,8 @@ require_relative 'point'
 # Figure out what it is really called and make it come from a method on Group.
 
 module ECDSA
+
+  class InvalidOpensslGroup < Exception; end
   class Group
     # The name of the group.
     # @return (String)
@@ -155,8 +157,10 @@ module ECDSA
       case name
       when 'prime256v1'
         ECDSA::Group::Secp256r1
-      when 'secp384v1'
+      when 'secp384r1'
         ECDSA::Group::Secp384r1
+      else
+        raise InvalidOpensslGroup, "Invalid group #{name}."
       end
     end
 
