@@ -12,6 +12,8 @@ module ECDSA
         bx = x509der.public_key.public_key.to_bn
         grp= x509der.public_key.public_key.group
         point = ECDSA::Format::PointOctetString.decode_from_ssl(bx, grp)
+        #puts "PUBKEY DECODED TO: #{point.x.to_s},#{point.y.to_s}"
+        point
       end
     end
 
