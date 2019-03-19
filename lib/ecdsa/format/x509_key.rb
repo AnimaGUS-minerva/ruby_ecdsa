@@ -9,8 +9,13 @@ module ECDSA
       # Converts an (OpenSSL) X509 format ECDSA public key into one that
       # this module can use.
       def self.decode(x509der)
-        bx = x509der.public_key.public_key.to_bn
-        grp= x509der.public_key.public_key.group
+
+        key = x509der.public_key
+        if OpenSSL::X509::Certificate == x509der
+          key = key.public_key
+        end
+        bx = key.to_bn
+        grp= key.group
         point = ECDSA::Format::PointOctetString.decode_from_ssl(bx, grp)
         #puts "PUBKEY DECODED TO: #{point.x.to_s},#{point.y.to_s}"
         point
