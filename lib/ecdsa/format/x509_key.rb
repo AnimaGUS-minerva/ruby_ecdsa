@@ -11,7 +11,7 @@ module ECDSA
       def self.decode(x509der)
 
         key = x509der.public_key
-        if OpenSSL::X509::Certificate == x509der
+        if OpenSSL::X509::Certificate === x509der
           key = key.public_key
         end
         bx = key.to_bn
