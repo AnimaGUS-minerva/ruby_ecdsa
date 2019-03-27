@@ -31,6 +31,7 @@ module ECDSA
         end
       end
 
+      # returns an ECDSA format ECDSA::Point from an SSL format key.
       def self.decode_from_ssl(ecpoint, group)
         grp = ECDSA::Group.group_from_openssl(group)
         size = ecpoint.num_bytes
